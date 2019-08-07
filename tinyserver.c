@@ -21,7 +21,6 @@ int main() {
     if (listenfd == -1) {
         return -1;
     }
-    printf("listen %d\n", listenfd);
 
     while (1) {
         int client_fd = accept(listenfd, (struct sockaddr *) &clientaddr, &clientaddrlen);
@@ -30,5 +29,7 @@ int main() {
             break;
         }
         parse_request(client_fd);
+        send_response(client_fd);
+        close(client_fd);
     }
 }

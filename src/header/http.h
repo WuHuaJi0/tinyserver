@@ -29,3 +29,4 @@ typedef struct {
 
 
 int parse_request(int client);
+int send_response(int client_fd);
