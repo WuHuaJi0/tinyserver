@@ -28,8 +28,8 @@ int main() {
             perror("accept");
             break;
         }
-        parse_request(client_fd);
-        send_response(client_fd);
+        request_package req_package = parse_request(client_fd);
+        send_response(client_fd,req_package);
         close(client_fd);
     }
 }

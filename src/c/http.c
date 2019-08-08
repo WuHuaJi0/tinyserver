@@ -4,18 +4,19 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "../header/http.h"
 
 /* TODO: 如果 buf_size 个字节 不够存怎么办？*/
 #define BUF_SIZE 200
-
+#define STATIC_BASE "/mnt/hgfs/code/fundament/tinyserver/static"
 
 int readline(int client_fd, char *line) {
     char c;
     int index = 0;
-    
+
     bzero(line, BUF_SIZE);
-    
+
     /* 逐个读取一个字符 */
     while (read(client_fd, &c, 1) > 0) {
         line[index] = c;
@@ -76,7 +77,7 @@ int parse_request_header(char *line, request_package *req_package) {
 
 
 /* 解析HTTP报文 */
-int parse_request(client_fd) {
+request_package parse_request(client_fd) {
 
     char line[BUF_SIZE];
     request_package req_package;
@@ -97,15 +98,61 @@ int parse_request(client_fd) {
             break;
         }
     }
-    return 0;
+    return req_package;
 }
 
 
 /* 返回响应 */
-int send_response(int client_fd) {
-    char response[] = "HTTP/1.1 200 OK\r\nServer: tinyserver1.1\r\n\r\nhelloworld";
+int send_response(int client_fd, request_package req_package) {
+
+    /*请求的文件路径*/
+    char static_file_path[200] ;
+    bzero(static_file_path,200);
+    strcat(static_file_path, STATIC_BASE);
+    strcat(static_file_path, req_package.req_line.uri);
+
+
+    response_package res_package;
+    res_package.res_status = "HTTP/1.1 200 OK";
+    res_package.res_header.server = "Server: tinyserver v0.1";
+    res_package.res_header.contenttype = "Content-Type: text/html";
+
+    if ((access(static_file_path, F_OK)) == -1) {
+        res_package.res_status = "HTTP/1.1 404 Not Found";
+        res_package.body = "404 Not Found";
+    }else if ((access(static_file_path, R_OK)) == -1) {
+        res_package.res_status = "HTTP/1.1 403 FORBIDDEN";
+        res_package.body = "403 forbidden";
+    }else{
+        FILE *f = fopen(static_file_path, "rb");
+        fseek(f, 0, SEEK_END);
+        long fsize = ftell(f);
+        fseek(f, 0, SEEK_SET);  /* same as rewind(f); */
+
+        char *string = malloc(fsize + 1);
+        fread(string, 1, fsize, f);
+        fclose(f);
+
+        string[fsize] = 0;
+        res_package.body = string;
+    }
+
+
+    char *response = malloc(10000);
+    bzero(response,10000);
+    strcat(response,res_package.res_status);
+    strcat(response,"\r\n");
+
+    strcat(response,res_package.res_header.contenttype);
+    strcat(response,"\r\n");
+
+    strcat(response,res_package.res_header.server);
+    strcat(response,"\r\n\r\n");
+
+    strcat(response,res_package.body);
+
     int writenum = write(client_fd, response, sizeof(char) * strlen(response));
-    if( writenum < 0 ){
+    if (writenum < 0) {
         return -1;
     }
 }
