@@ -53,10 +53,6 @@ def send_response(client_socket,request_package):
 
     file_path = "./static" + request_package['request_line']['uri']
 
-    print(os.path.dirname(__file__))
-
-    print(realpath(file_path))
-
     if not os.access(file_path, os.F_OK):
         file = open("./static/error/404.html")
     elif not os.access(file_path, os.R_OK):

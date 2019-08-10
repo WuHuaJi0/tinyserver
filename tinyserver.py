@@ -15,3 +15,4 @@ if __name__ == '__main__':
         request_string = client_socket.recv(1000)
         request = http.parse_request(request_string)
         http.send_response(client_socket,request)
+        client_socket.close()
