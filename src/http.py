@@ -42,11 +42,13 @@ def parse_request(request_string):
 
 
 # 返回静态文件
-def send_response(client_socket,request_package):
+def send_response(client_socket, request_package):
     response = {
         "status": "HTTP/1.1 200 OK",
         "response_header": {
             "Server": "Tinyserver by wuhuaji",
+            "Connection": "keep-alive",
+            "Content-Length": "",
         },
         "body": ""
     }
@@ -61,12 +63,14 @@ def send_response(client_socket,request_package):
         file = open(file_path)
 
     response['body'] = file.read()
+    response["response_header"]["Content-Length"] = str(len(response['body']))
     file.close()
 
     response_string = response['status'] + "\r\n"
     for i in response["response_header"]:
-        response_string += i + ": " + response["response_header"][i] + "\r\n\r\n"
+        response_string += i + ": " + response["response_header"][i] + "\r\n"
+    response_string += "\r\n"
 
     response_string += response["body"]
-    client_socket.send(response_string.encode("UTF-8"))
+    send_result = client_socket.send(response_string.encode("UTF-8"))
 
