@@ -15,14 +15,16 @@ if __name__ == '__main__':
         # 使用子进程来处理请求
         if os.fork() == 0:
             while True:
+                # recv 是个阻塞函数，没有数据流入会阻塞在此处
                 request_string = client_socket.recv(1000)
 
+                # 据recv文档，如果 request_string 为空，则客户端已经关闭连接了：
                 if not request_string:
-                    break
+                    exit(0)
 
                 request = http.parse_request(request_string)
                 http.send_response(client_socket, request)
-            exit(0)
+
 
         else:
             continue
