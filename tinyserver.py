@@ -16,10 +16,13 @@ if __name__ == '__main__':
         if os.fork() == 0:
             while True:
                 request_string = client_socket.recv(1000)
+
                 if not request_string:
-                    continue
+                    break
+
                 request = http.parse_request(request_string)
                 http.send_response(client_socket, request)
-                # client_socket.close()
+            exit(0)
+
         else:
             continue
