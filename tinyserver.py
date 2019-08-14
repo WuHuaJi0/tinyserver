@@ -18,7 +18,11 @@ if __name__ == '__main__':
                 request = http.get_request(client_socket)
                 if not request:
                     exit()
+                http.send_response(client_socket, request)
 
-                http.send_response(client_socket,request)
+                if "Connection" not in request["header"] or request["header"]["Connection"] != "keep-alive":
+                    client_socket.close()
+                    exit()
         else:
+            client_socket.close()
             continue

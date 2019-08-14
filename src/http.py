@@ -19,6 +19,7 @@ def get_request(client_sock):
         char = client_sock.recv(1)
         # 据recv文档，如果 request_string 为空，则客户端已经关闭连接了：
         if not char:
+            client_sock.close()
             return False
 
         line += char.decode("UTF-8")
@@ -58,7 +59,7 @@ def send_response(client_socket, request_package):
         "status": "HTTP/1.1 200 OK",
         "response_header": {
             "Server": "Tinyserver by wuhuaji",
-            "Connection": "keep-alive",
+            # "Connection": "keep-alive",
             "Content-Length": "",
         },
         "body": ""
@@ -83,4 +84,4 @@ def send_response(client_socket, request_package):
     response_string += "\r\n"
 
     response_string += response["body"]
-    send_result = client_socket.send(response_string.encode("UTF-8"))
+    client_socket.send(response_string.encode("UTF-8"))
