@@ -19,7 +19,6 @@ def get_request(client_sock):
         char = client_sock.recv(1)
         # 据recv文档，如果 request_string 为空，则客户端已经关闭连接了：
         if not char:
-            client_sock.close()
             return False
 
         line += char.decode("UTF-8")
