@@ -23,7 +23,7 @@ def get_request(client_sock):
 
         line += char.decode("UTF-8")
 
-        # 如果是空行，则接下来就是请求体，如果有Content-length,则有请求体;如果没有Content-length，则请求报文已经读完
+        # 如果是空行，则接下来就是请求体，如果有 Content-length,则有请求体;如果没有Content-length，则请求报文已经读完
         if line == "\r\n":
             if "Content-Length" in request["header"]:
                 request["body"] = client_sock.recv[request["header"]["Content-Length"]]
