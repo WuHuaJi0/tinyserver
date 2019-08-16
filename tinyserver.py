@@ -1,38 +1,33 @@
 from src import tcp
-from src import http
+from src import io
 import random
-import select
+import sys
 
-if __name__ == '__main__':
+
+# 选择io复用模型
+def select_mode():
+    types = ["select", "poll", "epoll"]
+    for i in sys.argv:
+        args = i.split("=")
+        if len(args) == 2 and args[0] == 'mode' and args[1] in types:
+            return args[1]
+    return "select"
+
+
+def main():
     port = random.randint(1000, 3000)
 
     print("监听在：" + str(port) + " 端口")
-    server_socket = tcp.server_listen(port)
+    server = tcp.server_listen(port)
 
-    epoll = select.epoll(1024)
-    epoll.register(server_socket, select.EPOLLIN)
+    mode = select_mode()
+    if mode == 'select':
+        io.select(server)
+    elif mode == "poll":
+        io.poll(server)
+    elif mode == "epoll":
+        io.epoll(server)
 
-    all_client = {}
-    while True:
-        all_fd = epoll.poll(1)
-        for (fd, event) in all_fd:
-            if fd == server_socket.fileno():
-                (client,address) = server_socket.accept()
-                print(client)
-                print(client.fileno())
-                all_client[client.fileno()] = client
-                epoll.register(client, select.EPOLLIN )
-            else:
-                client = all_client[fd]
-                request = http.get_request(client)
-                if not request:
-                    client.close()
-                    epoll.unregister(fd)
-                    del all_client[fd]
-                    continue
-                http.send_response(client, request)
 
-                if "Connection" not in request["header"] or request["header"]["Connection"] != "keep-alive":
-                    client.close()
-                    epoll.unregister(fd)
-                    del all_client[fd]
+if __name__ == '__main__':
+    main()

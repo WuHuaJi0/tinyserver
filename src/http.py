@@ -52,6 +52,12 @@ def parse_request_header(request_line):
     return request_line.split(": ")
 
 
+def is_keep_alive(request):
+    if "Connection" not in request["header"] or request["header"]["Connection"] != "keep-alive":
+        return False
+    return True
+
+
 # 返回静态文件
 def send_response(client_socket, request_package):
     response = {
