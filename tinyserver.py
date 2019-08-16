@@ -3,38 +3,36 @@ from src import http
 import random
 import select
 
-
 if __name__ == '__main__':
     port = random.randint(1000, 3000)
 
     print("监听在：" + str(port) + " 端口")
     server_socket = tcp.server_listen(port)
-    readfiles = [server_socket]
 
-    poll = select.poll()
-    poll.register(server_socket, select.POLLIN)
+    epoll = select.epoll(1024)
+    epoll.register(server_socket, select.EPOLLIN)
 
-    clients = {}
+    all_client = {}
     while True:
-        result = poll.poll(1000)
-        for (sock, event) in result:
-
-            if sock == server_socket.fileno():
-                (client_socket, address) = server_socket.accept()
-                poll.register(client_socket, select.POLLIN)
-                clients[client_socket.fileno()] = client_socket
+        all_fd = epoll.poll(1)
+        for (fd, event) in all_fd:
+            if fd == server_socket.fileno():
+                (client,address) = server_socket.accept()
+                print(client)
+                print(client.fileno())
+                all_client[client.fileno()] = client
+                epoll.register(client, select.EPOLLIN )
             else:
-                client_socket = clients[sock]
-                request = http.get_request(client_socket)
+                client = all_client[fd]
+                request = http.get_request(client)
                 if not request:
-                    client_socket.close()
-                    poll.unregister(sock)
-                    del clients[sock]
+                    client.close()
+                    epoll.unregister(fd)
+                    del all_client[fd]
                     continue
-
-                http.send_response(client_socket, request)
+                http.send_response(client, request)
 
                 if "Connection" not in request["header"] or request["header"]["Connection"] != "keep-alive":
-                    client_socket.close()
-                    poll.unregister(sock)
-                    del clients[sock]
+                    client.close()
+                    epoll.unregister(fd)
+                    del all_client[fd]
