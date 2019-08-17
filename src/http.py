@@ -53,24 +53,25 @@ def parse_request_header(request_line):
 
 
 def is_keep_alive(request):
-    if "Connection" not in request["header"] or request["header"]["Connection"] != "keep-alive":
+    if "Connection" not in request["header"] or str.upper(request["header"]["Connection"]) != "KEEP-ALIVE":
         return False
     return True
 
 
 # 返回静态文件
-def send_response(client_socket, request_package):
+def send_response(client_socket, request):
     response = {
         "status": "HTTP/1.1 200 OK",
         "response_header": {
             "Server": "Tinyserver by wuhuaji",
-            # "Connection": "keep-alive",
             "Content-Length": "",
         },
         "body": ""
     }
+    if "Connection" in request["header"] and str.upper(request["header"]["Connection"]) == "KEEP-ALIVE":
+        response["response_header"]["Connection"] = "keep-alive"
 
-    file_path = "./static" + request_package['request_line']['uri']
+    file_path = "./static" + request['request_line']['uri']
 
     if not os.access(file_path, os.F_OK):
         file = open("./static/error/404.html")
