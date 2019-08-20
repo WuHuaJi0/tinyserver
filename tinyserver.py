@@ -21,12 +21,8 @@ def main():
     server = tcp.listen(port)
 
     mode = select_mode()
-    if mode == 'select':
-        io.select(server)
-    elif mode == "poll":
-        io.poll(server)
-    elif mode == "epoll":
-        io.epoll(server)
+    selector = io.IO(mode)
+    selector.wait(server)
 
 
 if __name__ == '__main__':
