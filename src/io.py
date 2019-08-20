@@ -62,7 +62,7 @@ def epoll(server):
     epoll.register(server, s.EPOLLIN)
     all_client = {}
     while True:
-        all_fd = epoll.poll(1)
+        all_fd = epoll.poll(0)
         for (fd, event) in all_fd:
             if fd == server.fileno():
                 (client, address) = server.accept()

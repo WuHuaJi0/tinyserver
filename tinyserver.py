@@ -18,7 +18,7 @@ def main():
     port = random.randint(1000, 3000)
 
     print("监听在：" + str(port) + " 端口")
-    server = tcp.server_listen(port)
+    server = tcp.listen(port)
 
     mode = select_mode()
     if mode == 'select':
