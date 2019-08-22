@@ -5,5 +5,4 @@ def listen(port=3000):
     server = socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
     server.bind(("", port))
     server.listen(100)
-    server.setblocking(False)
     return server

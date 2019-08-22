@@ -34,7 +34,7 @@ class IO:
     def wait(self, server):
         self.sel.register(server, selectors.EVENT_READ, self.accept)
         while True:
-            events = self.sel.select()
+            events = self.sel.select(-1)
             for key, mask in events:
                 callback = key.data
                 callback(key.fileobj, mask)
