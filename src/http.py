@@ -77,11 +77,11 @@ def send_response(client_socket, request):
     file_path = "./static" + request['request_line']['uri']
 
     if not os.access(file_path, os.F_OK):
-        file = open("./static/error/404.html")
+        file_path = "./static/error/404.html"
     elif not os.access(file_path, os.R_OK):
-        file = open("./static/error/403.html")
-    else:
-        file = open(file_path)
+        file_path = "./static/error/403.html"
+
+    file = open(file_path)
 
     response['body'] = file.read()
     response["response_header"]["Content-Length"] = str(len(response['body']))
