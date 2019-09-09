@@ -16,8 +16,12 @@ def select_mode():
 
 def main():
     port = random.randint(1000, 3000)
-
     print("监听在：" + str(port) + " 端口")
+
+    port_file = open("./tinyserver.port","w")
+    port_file.write(str(port))
+    port_file.close()
+
     server = tcp.listen(port)
 
     mode = select_mode()

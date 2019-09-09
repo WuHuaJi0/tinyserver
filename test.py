@@ -23,13 +23,15 @@ def request(i):
     print(response.read(1000).decode('UTF-8'))
     time.sleep(0.05)
     using_connection.remove(rand)
-    pass
 
-
+# 初始化 HTTPConnection
 connections = []
 using_connection = {-1,}
 for i in range(1000):
-    connection = client.HTTPConnection("172.16.200.128", 1516)
+    port_file = open("./tinyserver.port","r")
+    port = port_file.read(4)
+    connection = client.HTTPConnection("localhost", port)
+    # connection = client.HTTPConnection("172.16.200.128", 1516)
     connections.append(connection)
 
 before = time.time()
