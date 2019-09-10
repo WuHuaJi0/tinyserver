@@ -6,10 +6,14 @@ import time
 from multiprocessing import Pool
 
 
+CONNECTION_NUM = 1000 #connection 数量
+PROCESS_NUM = 40
+REQUEST_NUM = 10000 #请求数量
+
 def rand_connection():
-    rand = random.randint(0, 1000)
+    rand = random.randint(0, CONNECTION_NUM)
     while(rand in using_connection):
-        rand = random.randint(0, 1000)
+        rand = random.randint(0, CONNECTION_NUM)
     return rand
     
 
@@ -21,22 +25,22 @@ def request(i):
     connection.request('GET', '/', None, {"Connection": "keep-alive"})
     response = connection.getresponse()
     print(response.read(1000).decode('UTF-8'))
-    time.sleep(0.05)
     using_connection.remove(rand)
 
 # 初始化 HTTPConnection
 connections = []
 using_connection = {-1,}
-for i in range(1000):
+for i in range(CONNECTION_NUM):
     port_file = open("./tinyserver.port","r")
     port = port_file.read(4)
     connection = client.HTTPConnection("localhost", port)
-    # connection = client.HTTPConnection("172.16.200.128", 1516)
     connections.append(connection)
 
+
+
 before = time.time()
-po = Pool(40)
-for i in range(10000):
+po = Pool(PROCESS_NUM)
+for i in range(REQUEST_NUM):
     po.apply_async(request, (i,))
 
 po.close()
